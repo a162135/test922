@@ -16,12 +16,12 @@
     </bean>
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
-        <property name="basePackage" value="com.crm.dao" />
+        <property name="basePackage" value="com.crm.settings.dao" />
     </bean>
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource" />
     </bean>
     <tx:annotation-driven />
-    <mvc:component-scan base-package="com.crm.service" />
+    <mvc:component-scan base-package="com.crm.settings.service" />
 
 </beans>
