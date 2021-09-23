@@ -7,21 +7,32 @@
 <script type="text/javascript" src="jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="js/crmUtil.js"></script>
 	<script type="text/javascript">
+		$(function (){
+			$("#username").val("");
+			$("#password").val("");
+			$("#username").focus();
+			$(window).keydown(function (event){
+				if (event.keyCode == 13){
+					$("#loginBtn").click();
+				}
+			});
+		})
 		function login(){
 			var formClass = [new FormClass("用户名","username"),new FormClass("密码","password")];
 			if (notNull(formClass)){
                 $.ajax({
                     url:"/crm/user/login.do",
                     data:{
-                        "username":$("#username").val(),
-                        "password":$("#password").val()
+                        "username":$("#username").val().trim(),
+                        "password":$("#password").val().trim()
                     },
-                    dataType:"text",
+					type:"post",
+                    dataType:"json",
                     success:function (data){
-                        if (data == "true"){
+                        if (data.success){
                             location.href = "workbench/index.html";
                         } else {
-                            alert(data);
+                            alert(data.msg);
                         }
                     }
                 })
@@ -55,7 +66,7 @@
 							<span id="msg"></span>
 						
 					</div>
-					<button type="button" class="btn btn-primary btn-lg btn-block" onclick="login()"  style="width: 350px; position: relative;top: 45px;">登录</button>
+					<button id="loginBtn" type="button" class="btn btn-primary btn-lg btn-block" onclick="login()"  style="width: 350px; position: relative;top: 45px;">登录</button>
 				</div>
 			</form>
 		</div>
