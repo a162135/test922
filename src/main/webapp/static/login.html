@@ -5,23 +5,27 @@
 <link href="jquery/bootstrap_3.3.0/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
 <script type="text/javascript" src="jquery/jquery-3.4.1.js"></script>
 <script type="text/javascript" src="jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/crmUtil.js"></script>
 	<script type="text/javascript">
 		function login(){
-			$.ajax({
-				url:"/crm/user/login.do",
-				data:{
-					"username":$("#username").val(),
-					"password":$("#password").val()
-				},
-				dataType:"text",
-				success:function (data){
-					if (data == "true"){
-						location.href = "workbench/index.html";
-					} else {
-						alert(data);
-					}
-				}
-			})
+			var formClass = [new FormClass("用户名","username"),new FormClass("密码","password")];
+			if (notNull(formClass)){
+                $.ajax({
+                    url:"/crm/user/login.do",
+                    data:{
+                        "username":$("#username").val(),
+                        "password":$("#password").val()
+                    },
+                    dataType:"text",
+                    success:function (data){
+                        if (data == "true"){
+                            location.href = "workbench/index.html";
+                        } else {
+                            alert(data);
+                        }
+                    }
+                })
+            }
 		}
 	</script>
 </head>
