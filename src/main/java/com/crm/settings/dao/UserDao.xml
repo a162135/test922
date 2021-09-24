@@ -6,4 +6,10 @@
     <select id="selectUserLogin" resultType="com.crm.settings.domain.User">
         select * from tbl_user where loginAct = #{loginAct} and loginPwd = #{loginPwd}
     </select>
+    <select id="selectIdByName" resultType="string">
+        select id from tbl_user where name = #{name}
+    </select>
+    <select id="selectName" resultType="string">
+        select name from tbl_user
+    </select>
 </mapper>

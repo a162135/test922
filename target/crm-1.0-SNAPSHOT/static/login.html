@@ -19,7 +19,7 @@
 		})
 		function login(){
 			var formClass = [new FormClass("用户名","username"),new FormClass("密码","password")];
-			if (notNull(formClass)){
+			if (crmUtil.notNull(formClass)){
                 $.ajax({
                     url:"/crm/user/login.do",
                     data:{

@@ -20,9 +20,11 @@ public class AllExceptionHandler {
         return map;
     }
 
-    @ExceptionHandler
-    public String exception(Exception e){
-        System.out.println(e.getMessage());
-        return "forward:/static/index.html";
-    }
+//    @ExceptionHandler
+//    public String exception(Exception e) {
+//        System.out.println("----------------------------------------------");
+//        System.out.println(e.getMessage());
+//        System.out.println("----------------------------------------------");
+//        return "redirect:/exception.html";
+//    }
 }

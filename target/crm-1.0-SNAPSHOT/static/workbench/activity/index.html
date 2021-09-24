@@ -13,38 +13,178 @@
 <script type="text/javascript" src="../../js/crmUtil.js"></script>
 <script type="text/javascript">
 
+	var userObj;
+	var page = 1;
+	var pageSize = 2;
+	var pageCount;
+
 	$(function(){
-		var user = getAttribute("user");
-		$("#create-createBy").val(user.name);
-		
+		userObj = crmUtil.getAttribute("user");
+		$("#create-createBy").val(userObj.name);
+		$(".time").datetimepicker({
+			language:  "zh-CN",
+			format: "yyyy-mm-dd hh:ii:ss",//显示格式
+			minView: "hour",//设置只显示到月份
+			initialDate: new Date(),//初始化当前日期
+			autoclose: true,//选中自动关闭
+			todayBtn: true, //显示今日按钮
+			clearBtn : true,
+			pickerPosition: "bottom-left"
+		});
+
+		$(".time").datetimepicker({
+			minView: "month",
+			language:  'zh-CN',
+			format: 'yyyy-mm-dd',
+			autoclose: true,
+			todayBtn: true,
+			pickerPosition: "bottom-left"
+		});
+
+		clearPage();
 	});
 
+	function createActivityModal(){
+		$("#create-marketActivityOwner").val("");
+		$("#create-marketActivityName").val("");
+		$("#create-startTime").val("");
+		$("#create-endTime").val("");
+		$("#create-cost").val("");
+		$("#create-description").val("");
+		$("#createActivityModal").modal("show");
+		$.ajax({
+			url:"/crm/activity/getOwner.do",
+			dataType:"json",
+			success:function (data){
+				var html = "";
+				for (var i = 0; i < data.length; i++) {
+					html += "<option value='"+data[i]+"'>"+data[i]+"</option>"
+				}
+				$("#create-marketActivityOwner").append(html);
+				if (userObj != undefined){
+					$("#create-marketActivityOwner").val(userObj.name);
+				}
+			}
+		})
+		$(".time").datetimepicker({
+			language:  "zh-CN",
+			format: "yyyy-mm-dd hh:ii:ss",//显示格式
+			minView: "hour",//设置只显示到月份
+			initialDate: new Date(),//初始化当前日期
+			autoclose: true,//选中自动关闭
+			todayBtn: true, //显示今日按钮
+			clearBtn : true,
+			pickerPosition: "bottom-left"
+		});
+
+		$(".time").datetimepicker({
+			minView: "month",
+			language:  'zh-CN',
+			format: 'yyyy-mm-dd',
+			autoclose: true,
+			todayBtn: true,
+			pickerPosition: "bottom-left"
+		});
+	}
+
 	function saveActivity(){
-		alert(1)
 		var formClass = [new FormClass("所有者","create-marketActivityOwner"),new FormClass("名称","create-marketActivityName")];
-		if (notNull(formClass)){
+		if (crmUtil.notNull(formClass)){
 			$.ajax({
 				url:"/crm/activity/saveActivity.do",
 				data:{
-					"owner":$("#create-marketActivityOwner").val(),
-					"name":$("#create-marketActivityName").val(),
-					"startDate":$("#create-startTime").val(),
-					"endDate":$("#create-endTime").val(),
-					"cost":$("#create-cost").val(),
-					"description":$("#create-description").val(),
-					"createBy":$("#create-createBy").val()
+					"owner":$("#create-marketActivityOwner").val().trim(),
+					"name":$("#create-marketActivityName").val().trim(),
+					"startDate":$("#create-startTime").val().trim(),
+					"endDate":$("#create-endTime").val().trim(),
+					"cost":$("#create-cost").val().trim(),
+					"description":$("#create-description").val().trim(),
+					"createBy":$("#create-createBy").val().trim()
 				},
 				dataType:"json",
 				type:"post",
 				success:function (data){
 					if (data.success){
-						$("#create-close").click();
+						$("#createActivityModal").modal("hide");
 					} else {
 						alert("保存失败");
 					}
 				}
 			})
 		}
+	}
+
+	//初始化分页
+	function clearPage(){
+		alert(pageSize)
+		$.ajax({
+			url:"/crm/activity/queryActivityPage.do",
+			data:{
+				"pageSize":pageSize
+			},
+			async:false
+		})
+		query();
+	}
+
+	//分页查询
+	function query(pageSet){
+		//修改页数
+		if (pageSet !== undefined){
+			var dataJson = {};
+			dataJson.page = pageSet;
+			page = pageSet;
+			$.ajax({
+				url:"/crm/activity/queryActivityPage.do",
+				data:dataJson,
+				async:false
+			})
+		}
+
+		//取得总页数
+		alert(1)
+		$.ajax({
+			url:"/crm/activity/queryActivityPageCount.do",
+			data:{
+				"name":$("#query-name").val().trim(),
+				"owner":$("#query-owner").val().trim(),
+				"startDate":$("#query-startTime").val().trim(),
+				"endDate":$("#query-endTime").val().trim()
+			},
+			dataType:"json",
+			async:false,
+			success:function (data){
+				pageCount = data.pageCount;
+				alert(data.pageCount + "总页")
+			}
+		})
+
+		//取得数据
+		$.ajax({
+			url:"/crm/activity/queryActivity.do",
+			data:{
+				"name":$("#query-name").val().trim(),
+				"owner":$("#query-owner").val().trim(),
+				"startDate":$("#query-startTime").val().trim(),
+				"endDate":$("#query-endTime").val().trim()
+			},
+			dataType:"json",
+			async:false,
+			success:function (data){
+				alert("数据")
+				var html = "";
+				for (var i = 0; i < data.length; i++) {
+					html += "<tr class=\"active\">\n" +
+							"\t\t\t\t\t\t\t<td><input type=\"checkbox\" /></td>\n" +
+							"\t\t\t\t\t\t\t<td><a style=\"text-decoration: none; cursor: pointer;\" onclick=\"window.location.href='detail.html';\">"+data[i].name+"</a></td>\n" +
+							"                            <td>"+data[i].owner+"</td>\n" +
+							"\t\t\t\t\t\t\t<td>"+data[i].startDate+"</td>\n" +
+							"\t\t\t\t\t\t\t<td>"+data[i].endDate+"</td>\n" +
+							"\t\t\t\t\t\t</tr>";
+				}
+				$("#activityTbody").html(html);
+			}
+		})
 	}
 </script>
 </head>
@@ -62,16 +202,13 @@
 				</div>
 				<div class="modal-body">
 				
-					<form class="form-horizontal" role="form">
+					<form id="create-activityForm" class="form-horizontal" role="form">
 					
 						<div class="form-group">
 							<input type="hidden" id="create-createBy">
 							<label for="create-marketActivityOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
 							<div class="col-sm-10" style="width: 300px;">
 								<select class="form-control" id="create-marketActivityOwner">
-								  <option>zhangsan</option>
-								  <option>lisi</option>
-								  <option>wangwu</option>
 								</select>
 							</div>
                             <label for="create-marketActivityName" class="col-sm-2 control-label">名称<span style="font-size: 15px; color: red;">*</span></label>
@@ -83,11 +220,11 @@
 						<div class="form-group">
 							<label for="create-startTime" class="col-sm-2 control-label">开始日期</label>
 							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="create-startTime">
+								<input type="text" class="form-control time" id="create-startTime">
 							</div>
 							<label for="create-endTime" class="col-sm-2 control-label">结束日期</label>
 							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="create-endTime">
+								<input type="text" class="form-control time" id="create-endTime">
 							</div>
 						</div>
                         <div class="form-group">
@@ -109,8 +246,7 @@
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal" id="create-close">关闭</button>
-					<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="saveActivity()">保存</button>
-					<input type="button" value="test" onclick="saveActivity()">
+					<button type="button" class="btn btn-primary" onclick="saveActivity()">保存</button>
 				</div>
 			</div>
 		</div>
@@ -200,14 +336,14 @@
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">名称</div>
-				      <input class="form-control" type="text">
+				      <input class="form-control" type="text" id="query-name">
 				    </div>
 				  </div>
 				  
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">所有者</div>
-				      <input class="form-control" type="text">
+				      <input class="form-control" type="text" id="query-owner">
 				    </div>
 				  </div>
 
@@ -215,23 +351,23 @@
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">开始日期</div>
-					  <input class="form-control" type="text" id="startTime" />
+					  <input class="form-control time" type="text" id="query-startTime" />
 				    </div>
 				  </div>
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">结束日期</div>
-					  <input class="form-control" type="text" id="endTime">
+					  <input class="form-control time" type="text" id="query-endTime">
 				    </div>
 				  </div>
 				  
-				  <button type="submit" class="btn btn-default">查询</button>
+				  <button type="submit" class="btn btn-default" onclick="query()">查询</button>
 				  
 				</form>
 			</div>
 			<div class="btn-toolbar" role="toolbar" style="background-color: #F7F7F7; height: 50px; position: relative;top: 5px;">
 				<div class="btn-group" style="position: relative; top: 18%;">
-				  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createActivityModal"><span class="glyphicon glyphicon-plus"></span> 创建</button>
+				  <button type="button" class="btn btn-primary" onclick="createActivityModal()"><span class="glyphicon glyphicon-plus"></span> 创建</button>
 				  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editActivityModal"><span class="glyphicon glyphicon-pencil"></span> 修改</button>
 				  <button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
 				</div>
@@ -248,14 +384,8 @@
 							<td>结束日期</td>
 						</tr>
 					</thead>
-					<tbody>
-						<tr class="active">
-							<td><input type="checkbox" /></td>
-							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='detail.html';">发传单</a></td>
-                            <td>zhangsan</td>
-							<td>2020-10-10</td>
-							<td>2020-10-20</td>
-						</tr>
+					<tbody id="activityTbody">
+
                         <tr class="active">
                             <td><input type="checkbox" /></td>
                             <td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='detail.html';">发传单</a></td>
