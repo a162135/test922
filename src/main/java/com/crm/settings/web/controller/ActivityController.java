@@ -41,7 +41,7 @@ public class ActivityController {
 
     @RequestMapping(value = "/activity/getOwner.do")
     @ResponseBody
-    public List<String> getOwner(){
+    public List<Activity> getOwner(){
         return service.getOwner();
     }
 
@@ -50,7 +50,6 @@ public class ActivityController {
     @ResponseBody
     public List<Activity> queryActivity(Activity activity,HttpSession session){
         Page page = (Page) session.getAttribute("activityPage");
-        System.out.println(page);
         if (page == null){
             page = new Page();
         }
@@ -99,5 +98,40 @@ public class ActivityController {
         map.put("pageCount",i);
         map.put("pageMax",pageMax);
         return map;
+
+    }
+
+    @RequestMapping(value = "/activity/removeActivity.do")
+    @ResponseBody
+    public Map<String,Object> removeActivity(String[] id){
+        System.out.println(id.length);
+        int i = service.removeActivity(id);
+        Map<String,Object> map = new HashMap<>();
+        if (i > 0){
+            map.put("success",true);
+        } else {
+            map.put("success",false);
+        }
+        return map;
+    }
+
+    @RequestMapping(value = "/activity/setActivity.do")
+    @ResponseBody
+    public Map<String,Object> setActivity(Activity activity){
+        activity.setEditTime(DateTimeUtil.getSysTime());
+        int i = service.setActivity(activity);
+        Map<String,Object> map = new HashMap<>();
+        if (i > 0){
+            map.put("success",true);
+        } else {
+            map.put("success",false);
+        }
+        return map;
+    }
+
+    @RequestMapping(value = "/activity/queryActivityById.do")
+    @ResponseBody
+    public Activity queryActivityById(Activity activity){
+        return service.queryActivityById(activity);
     }
 }

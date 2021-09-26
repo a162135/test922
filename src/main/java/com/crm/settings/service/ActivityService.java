@@ -7,7 +7,10 @@ import java.util.List;
 
 public interface ActivityService {
     int saveActivity(Activity activity);
-    List<String> getOwner();
+    List<Activity> getOwner();
     List<Activity> queryActivity(Activity activity);
     int queryActivityPage(Activity activity);
+    int removeActivity(String[] activities);
+    int setActivity(Activity activities);
+    Activity queryActivityById(Activity activity);
 }

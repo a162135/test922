@@ -23,15 +23,13 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     @Transactional
     public int saveActivity(Activity activity) {
-        String id = userDao.selectIdByName(activity.getOwner());
-        activity.setOwner(id);
         int i = activityDao.insertActivity(activity);
         return i;
     }
 
     @Override
-    public List<String> getOwner() {
-        return userDao.selectName();
+    public List<Activity> getOwner() {
+        return userDao.selectIdAndName();
     }
 
     @Override
@@ -45,5 +43,24 @@ public class ActivityServiceImpl implements ActivityService {
     public int queryActivityPage(Activity activity) {
 
         return activityDao.selectActivityPage(activity);
+    }
+
+    @Override
+    @Transactional
+    public int removeActivity(String[] activities) {
+        int i = activityDao.deleteActivity(activities);
+        return i;
+    }
+
+    @Override
+    @Transactional
+    public int setActivity(Activity activities) {
+        int i = activityDao.updateActivity(activities);
+        return i;
+    }
+
+    @Override
+    public Activity queryActivityById(Activity activity) {
+        return activityDao.selectActivityById(activity);
     }
 }

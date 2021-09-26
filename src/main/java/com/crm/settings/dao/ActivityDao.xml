@@ -8,38 +8,62 @@
                                         #{createTime},#{createBy},#{editTime},#{editBy})
     </insert>
     <select id="selectActivity" resultType="com.crm.settings.domain.Activity">
-        select * from tbl_activity
+        select a.id,a.name,a.startDate,a.endDate,u.name as owner,a.description,a.cost from tbl_activity a join tbl_user u on a.owner = u.id
         <where>
             <if test="name != null and name != ''">
-                and name like '%' #{name} '%'
+                and a.name like '%' #{name} '%'
             </if>
             <if test="owner != null and owner != ''">
-                and name like '%' #{owner} '%'
+                and u.name like '%' #{owner} '%'
             </if>
             <if test="startDate != null and startDate != ''">
-                and startDate >= #{startDate}
+                and a.startDate >= #{startDate}
             </if>
             <if test="endDate != null and endDate != ''">
-                and endDate &lt;= #{endDate}
+                and a.endDate &lt;= #{endDate}
+            </if>
+            <if test="id != null and id != ''">
+                and a.id = #{id}
             </if>
         </where>
-        order by createTime desc
+        order by a.editTime desc,a.createTime desc
     </select>
     <select id="selectActivityPage" resultType="int">
-        select count(*) from tbl_activity
+        select count(*) from tbl_activity a join tbl_user u on a.owner = u.id
         <where>
             <if test="name != null and name != ''">
-                and name like '%' #{name} '%'
+                and a.name like '%' #{name} '%'
             </if>
             <if test="owner != null and owner != ''">
-                and name like '%' #{owner} '%'
+                and u.name like '%' #{owner} '%'
             </if>
             <if test="startDate != null and startDate != ''">
-                and startDate >= #{startDate}
+                and a.startDate >= #{startDate}
             </if>
             <if test="endDate != null and endDate != ''">
-                and endDate &lt;= #{endDate}
+                and a.endDate &lt;= #{endDate}
+            </if>
+            <if test="id != null and id != ''">
+                and a.id = #{id}
             </if>
         </where>
+    </select>
+    <delete id="deleteActivity">
+        delete from tbl_activity where id in
+        <foreach collection="array" close=")" item="i" open="(" separator=",">
+            #{i}
+        </foreach>
+    </delete>
+    <update id="updateActivity">
+        update tbl_activity set
+        owner = #{owner},name = #{name},
+        startDate = #{startDate},endDate = #{endDate},
+        cost = #{cost},description = #{description},
+        editBy = #{editBy},editTime = #{editTime}
+        where id = #{id}
+    </update>
+    <select id="selectActivityById" resultType="com.crm.settings.domain.Activity">
+        select id,name,startDate,endDate,owner,description,cost from tbl_activity
+        where id = #{id}
     </select>
 </mapper>
