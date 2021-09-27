@@ -1,8 +1,10 @@
 package com.crm.settings.service.impl;
 
 import com.crm.settings.dao.ActivityDao;
+import com.crm.settings.dao.ActivityRemarkDao;
 import com.crm.settings.dao.UserDao;
 import com.crm.settings.domain.Activity;
+import com.crm.settings.domain.ActivityRemark;
 import com.crm.settings.service.ActivityService;
 import com.crm.settings.service.UserService;
 import com.crm.settings.vo.Page;
@@ -19,6 +21,8 @@ public class ActivityServiceImpl implements ActivityService {
     private ActivityDao activityDao;
     @Resource
     private UserDao userDao;
+    @Resource
+    private ActivityRemarkDao remarkDao;
 
     @Override
     @Transactional
@@ -48,6 +52,11 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     @Transactional
     public int removeActivity(String[] activities) {
+        ActivityRemark remark = new ActivityRemark();
+        for (int i = 0; i < activities.length; i++) {
+            remark.setId(activities[i]);
+            remarkDao.deleteRemarkByActivityId(remark);
+        }
         int i = activityDao.deleteActivity(activities);
         return i;
     }
@@ -62,5 +71,10 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public Activity queryActivityById(Activity activity) {
         return activityDao.selectActivityById(activity);
+    }
+
+    @Override
+    public List<Activity> queryAllById(Activity activity) {
+        return activityDao.selectAllById(activity);
     }
 }

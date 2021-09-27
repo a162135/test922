@@ -11,4 +11,5 @@ public interface ActivityDao {
     int deleteActivity(String[] activities);
     int updateActivity(Activity activity);
     Activity selectActivityById(Activity activity);
+    List<Activity> selectAllById(Activity activity);
 }

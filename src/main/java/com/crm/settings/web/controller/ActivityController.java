@@ -134,4 +134,11 @@ public class ActivityController {
     public Activity queryActivityById(Activity activity){
         return service.queryActivityById(activity);
     }
+
+
+    @RequestMapping(value = "/activity/queryAllById.do")
+    @ResponseBody
+    public List<Activity> queryAllById(Activity activity){
+        return service.queryAllById(activity);
+    }
 }

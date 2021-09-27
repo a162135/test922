@@ -66,4 +66,9 @@
         select id,name,startDate,endDate,owner,description,cost from tbl_activity
         where id = #{id}
     </select>
+    <select id="selectAllById" resultType="com.crm.settings.domain.Activity">
+        select a.id,a.name,a.startDate,a.endDate,a.description,a.cost,a.createTime,a.createBy,a.editTime,a.editBy,u.name as owner from tbl_activity a
+        join tbl_user u on a.owner = u.id
+        where a.id = #{id}
+    </select>
 </mapper>

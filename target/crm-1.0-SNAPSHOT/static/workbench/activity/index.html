@@ -177,7 +177,7 @@
 				for (var i = 0; i < data.length; i++) {
 					html += "<tr class=\"active\">\n" +
 							"\t\t\t\t\t\t\t<td><input type=\"checkbox\" value='"+data[i].id+"' onclick='activityCheckbox()' /></td>\n" +
-							"\t\t\t\t\t\t\t<td><a style=\"text-decoration: none; cursor: pointer;\" onclick=\"window.location.href='detail.html';\">"+data[i].name+"</a></td>\n" +
+							"\t\t\t\t\t\t\t<td><a style=\"text-decoration: none; cursor: pointer;\" id='"+data[i].id+"' onclick='goDetail(this.id)'>"+data[i].name+"</a></td>\n" +
 							"                            <td>"+data[i].owner+"</td>\n" +
 							"\t\t\t\t\t\t\t<td>"+data[i].startDate+"</td>\n" +
 							"\t\t\t\t\t\t\t<td>"+data[i].endDate+"</td>\n" +
@@ -214,10 +214,10 @@
 			p = parseInt(p);
 		}
 		if (p < 1){
-			p = 1;
+			return;
 		}
 		if (p > pageMax){
-			p = pageMax
+			return;
 		}
 		page_SetPage(p);
 		page_getData();
@@ -413,6 +413,22 @@
 				})
 			}
 		}
+	}
+	//跳转到detail页
+	function goDetail(id){
+		$.ajax({
+			url:"/crm/util/setAttributeString.do",
+			data:{
+				"name":"detailId",
+				"data":id
+			},
+			type:"post",
+			dataType:"json",
+			success:function (data){
+				window.location.href='detail.html';
+			}
+
+		})
 	}
 
 </script>

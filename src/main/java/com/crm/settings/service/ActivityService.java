@@ -13,4 +13,6 @@ public interface ActivityService {
     int removeActivity(String[] activities);
     int setActivity(Activity activities);
     Activity queryActivityById(Activity activity);
+
+    List<Activity> queryAllById(Activity activity);
 }

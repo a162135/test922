@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.crm.settings.dao.ActivityRemarkDao">
+    <!--通过activityId查询所有留言。加载页面后用-->
+    <select id="selectRemarkByActivityId" resultType="com.crm.settings.domain.ActivityRemark">
+        select * from tbl_activity_remark where activityId = #{activityId}
+    </select>
+    <!--activity的id作外键添加。添加一条留言-->
+    <insert id="insertRemark">
+        insert into tbl_activity_remark(id,noteContent,createTime,createBy,activityId,editFlag)
+        values(#{id},#{noteContent},#{createTime},#{createBy},#{activityId},0)
+    </insert>
+    <!--通过id删除单条留言。删除一条留言-->
+    <delete id="deleteRemarkById">
+        delete from tbl_activity_remark where id = #{id}
+    </delete>
+    <!--通过id查询单条留言。修改会用-->
+    <select id="selectRemarkById" resultType="com.crm.settings.domain.ActivityRemark">
+        select * from tbl_activity_remark where id = #{id}
+    </select>
+    <!--通过id修改留言。修改一条留言-->
+    <insert id="updateRemarkById">
+        update tbl_activity_remark set
+        noteContent = #{noteContent},
+        editTime = #{editTime},
+        editBy = #{editBy},
+        editFlag = 1
+        where id = #{id}
+    </insert>
+    <!--通过activityId删除留言。删除市场活动时用-->
+    <delete id="deleteRemarkByActivityId">
+        delete from tbl_activity_remark where
+        activityId = #{avtivityId}
+    </delete>
+</mapper>
