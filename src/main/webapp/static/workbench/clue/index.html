@@ -6,23 +6,104 @@
 <link href="../../jquery/bootstrap_3.3.0/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
 <link href="../../jquery/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet" />
 
-<script type="text/javascript" src="../../jquery/jquery-1.11.1-min.js"></script>
+<script type="text/javascript" src="../../jquery/jquery-3.4.1.js"></script>
+<script type="text/javascript" src="../../js/crmUtil.js"></script>
 <script type="text/javascript" src="../../jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../../jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
 <script type="text/javascript" src="../../jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js"></script>
 
 <script type="text/javascript">
 
+	var userObj;
+
 	$(function(){
-		
-		
-		
+		$.ajax({
+			url:"/crm/util/getDic.do",
+			dataType:"json",
+			success:function (dic){
+				var html = "<option></option>";
+				$.each(dic.appellation,function (index,item){
+					html += "<option value='"+item.id+"'>"+item.value+"</option>"
+				})
+				$("#create-call").html(html);
+
+				html = "<option></option>";
+				$.each(dic.source,function (index,item){
+					html += "<option value='"+item.id+"'>"+item.value+"</option>"
+				})
+				$("#create-source").html(html);
+
+				html = "<option></option>";
+				$.each(dic.clueState,function (index,item){
+					html += "<option value='"+item.id+"'>"+item.value+"</option>"
+				})
+				$("#create-status").html(html);
+			}
+		})
+		var user = crmUtil.getAttribute("user");
+		userObj = user;
+		$("#create-createBy").val(user.name);
+
 	});
-	
+
+	function createClueModal() {
+		$("#createClueModal").modal("show");
+		$.ajax({
+			url: "/crm/activity/getOwner.do",
+			dataType: "json",
+			success: function (data) {
+				var html = "";
+				for (var i = 0; i < data.length; i++) {
+					html += "<option value='" + data[i].id + "'>" + data[i].name + "</option>"
+				}
+				$("#create-clueOwner").html("");
+				$("#create-clueOwner").append(html);
+				if (userObj != undefined) {
+					$("#create-clueOwner").val(userObj.id);
+				}
+			}
+		})
+	}
+
+		function doSave() {
+			var formClass = [new FormClass("所有者", "create-clueOwner"), new FormClass("公司", "create-company"), new FormClass("姓名", "create-surname")];
+			if (crmUtil.notNull(formClass)) {
+				$.ajax({
+					url: "/crm/clue/addClue.do",
+					data: {
+						"fullname": $("#create-surname").val().trim(),
+						"appellation": $("#create-call").val().trim(),
+						"owner": $("#create-clueOwner").val().trim(),
+						"company": $("#create-company").val().trim(),
+						"job": $("#create-job").val().trim(),
+						"email": $("#create-email").val().trim(),
+						"phone": $("#create-phone").val().trim(),
+						"website": $("#create-website").val().trim(),
+						"mphone": $("#create-mphone").val().trim(),
+						"state": $("#create-status").val().trim(),
+						"source": $("#create-source").val().trim(),
+						"description": $("#create-describe").val().trim(),
+						"contactSummary": $("#create-contactSummary").val().trim(),
+						"nextContactTime": $("#create-nextContactTime").val().trim(),
+						"address": $("#create-address").val().trim(),
+						"createBy": $("#create-createBy").val().trim()
+					},
+					type: "post",
+					dataType: "json",
+					success: function (data) {
+						if (data.success) {
+							$("#createClueModal").modal("hide");
+						} else {
+							alert("保存失败");
+						}
+					}
+				})
+			}
+		}
 </script>
 </head>
 <body>
-
+	<input type="hidden" id="create-createBy">
 	<!-- 创建线索的模态窗口 -->
 	<div class="modal fade" id="createClueModal" role="dialog">
 		<div class="modal-dialog" role="document" style="width: 90%;">
@@ -174,7 +255,7 @@
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-					<button type="button" class="btn btn-primary" data-dismiss="modal">保存</button>
+					<button type="button" class="btn btn-primary" onclick="doSave()">保存</button>
 				</div>
 			</div>
 		</div>
@@ -438,7 +519,7 @@
 			</div>
 			<div class="btn-toolbar" role="toolbar" style="background-color: #F7F7F7; height: 50px; position: relative;top: 40px;">
 				<div class="btn-group" style="position: relative; top: 18%;">
-				  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createClueModal"><span class="glyphicon glyphicon-plus"></span> 创建</button>
+				  <button type="button" class="btn btn-primary" onclick="createClueModal()"><span class="glyphicon glyphicon-plus"></span> 创建</button>
 				  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editClueModal"><span class="glyphicon glyphicon-pencil"></span> 修改</button>
 				  <button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
 				</div>

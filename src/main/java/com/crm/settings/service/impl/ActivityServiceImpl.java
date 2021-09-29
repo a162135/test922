@@ -52,10 +52,8 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     @Transactional
     public int removeActivity(String[] activities) {
-        ActivityRemark remark = new ActivityRemark();
         for (int i = 0; i < activities.length; i++) {
-            remark.setId(activities[i]);
-            remarkDao.deleteRemarkByActivityId(remark);
+            remarkDao.deleteRemarkByActivityId(activities[i]);
         }
         int i = activityDao.deleteActivity(activities);
         return i;
@@ -76,5 +74,10 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public List<Activity> queryAllById(Activity activity) {
         return activityDao.selectAllById(activity);
+    }
+
+    @Override
+    public List<Activity> queryActivityAll() {
+        return activityDao.selectAll();
     }
 }

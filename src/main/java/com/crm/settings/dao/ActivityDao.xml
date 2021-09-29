@@ -71,4 +71,7 @@
         join tbl_user u on a.owner = u.id
         where a.id = #{id}
     </select>
+    <select id="selectAll" resultType="com.crm.settings.domain.Activity">
+        select * from tbl_activity
+    </select>
 </mapper>

@@ -1,12 +1,15 @@
 package com.crm.settings.web.controller;
 
+import com.crm.settings.domain.DicValue;
 import com.crm.settings.domain.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -32,5 +35,11 @@ public class SessionAttributeUtil {
         Map<String,Object> map = new HashMap<>();
         map.put("success",true);
         return map;
+    }
+
+    @RequestMapping(value = "/util/getDic.do")
+    @ResponseBody
+    public Map<String, List<DicValue>> getDic(HttpServletRequest request){
+        return (Map<String, List<DicValue>>) request.getServletContext().getAttribute("dic");
     }
 }

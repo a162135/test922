@@ -55,6 +55,12 @@
 		var user = crmUtil.getAttribute("user");
 		$("#hidden-userId").val(user.id);
 		$("#hidden-userName").val(user.name);
+        $("#remarkBody").on("mouseover",".remarkDiv",function(){
+            $(this).children("div").children("div").show();
+        })
+        $("#remarkBody").on("mouseout",".remarkDiv",function(){
+            $(this).children("div").children("div").hide();
+        })
 	});
 
 	<!--页面初始化-->
@@ -143,20 +149,70 @@
 					html+= "<div id='"+data[i].id+"' class=\"remarkDiv\" style=\"height: 60px;\">\n" +
 							"\t\t\t<img title=\""+data[i].createBy+"\" src=\"../../image/user-thumbnail.png\" style=\"width: 30px; height:30px;\">\n" +
 							"\t\t\t<div style=\"position: relative; top: -40px; left: 40px;\" >\n" +
-							"\t\t\t\t<h5>"+data[i].noteContent+"</h5>\n" +
+							"\t\t\t\t<input type='text' id='"+data[i].id+"hidden' value='"+data[i].noteContent+"' hidden><h5 id='"+data[i].id+"noteContent'>"+data[i].noteContent+"</h5>\n" +
 							"\t\t\t\t<font color=\"gray\">市场活动</font> <font color=\"gray\">-</font> <b>"+activityName+"</b> <small style=\"color: gray;\">"+dataTime+"</small>\n" +
-							"\t\t\t\t<div style=\"position: relative; left: 500px; top: -30px; height: 30px; width: 100px; display: none;\">\n" +
-							"\t\t\t\t\t<a class=\"myHref\" href=\"javascript:void(0);\"><span class=\"glyphicon glyphicon-edit\" style=\"font-size: 20px; color: #E6E6E6;\"></span></a>\n" +
-							"\t\t\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;\n" +
-							"\t\t\t\t\t<a class=\"myHref\" href=\"javascript:void(0);\"><span class=\"glyphicon glyphicon-remove\" style=\"font-size: 20px; color: #E6E6E6;\"></span></a>\n" +
-							"\t\t\t\t</div>\n" +
-							"\t\t\t</div>\n" +
-							"\t\t</div>";
+							"\t\t\t\t<div style=\"position: relative; left: 500px; top: -30px; height: 30px; width: 100px; display: none;\">\n";
+                    html += "<a class=\"myHref\" name='"+data[i].id+"' onclick='setRemark(this.name)'><span class=\"glyphicon glyphicon-edit\" style=\"font-size: 20px; color: #ff0000;\"></span></a>\n" +
+							"&nbsp;&nbsp;&nbsp;&nbsp;\n" +
+							"<a class=\"myHref\" name='"+data[i].id+"' onclick='removeRemark(this.name)'><span class=\"glyphicon glyphicon-remove\" style=\"font-size: 20px; color: #ff0000;\"></span></a>\n" +
+							"</div>\n" +
+							"</div>\n" +
+							"</div>";
 				}
 				$("#remarkSpan").html(html);
 			}
 		})
 	}
+
+	<!--删除留言-->
+    function removeRemark(name){
+	    if (window.confirm("确定删除此条？")){
+	        $.ajax({
+                url:"/crm/activityRemark/removeRemark.do",
+                data:{
+                    id:name
+                },
+                dataType:"json",
+                type:"post",
+                success:function (data){
+                    if (data.success){
+                        queryRemark();
+                    }
+                }
+            })
+        }
+    }
+
+    <!--修改留言-->
+    function setRemark(name){
+        $("#"+name+"hidden").attr("hidden",false);
+        var tempHtml = $("#"+name+"noteContent").html();
+        $("#"+name+"noteContent").html("");
+        $("#"+name+"hidden").focus();
+        $("#"+name+"hidden").on("blur",function (){
+            $("#"+name+"hidden").val($("#"+name+"hidden").val().trim());
+            $("#"+name+"hidden").attr("hidden",true);
+            if ($("#"+name+"hidden").val().trim() !== tempHtml){
+                $.ajax({
+                    url:"/crm/activityRemark/setRemark.do",
+                    data:{
+                        "id":name,
+                        "noteContent":$("#"+name+"hidden").val().trim(),
+                        "editBy":$("#hidden-userName").val()
+                    },
+                    type:"post",
+                    dataType:"json",
+                    success:function (data){
+                        if (data.success){
+                            queryRemark();
+                        }
+                    }
+                })
+            } else {
+                $("#"+name+"noteContent").html(tempHtml);
+            }
+        })
+    }
 
 
 </script>
@@ -325,7 +381,7 @@
 	</div>
 	
 	<!-- 备注 -->
-	<div style="position: relative; top: 30px; left: 40px;">
+	<div style="position: relative; top: 30px; left: 40px;" id="remarkBody">
 		<div class="page-header">
 			<h4>备注</h4>
 		</div>

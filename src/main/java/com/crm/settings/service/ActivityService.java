@@ -15,4 +15,5 @@ public interface ActivityService {
     Activity queryActivityById(Activity activity);
 
     List<Activity> queryAllById(Activity activity);
+    List<Activity> queryActivityAll();
 }

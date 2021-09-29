@@ -10,5 +10,5 @@ public interface ActivityRemarkDao {
     int deleteRemarkById(ActivityRemark remark);
     ActivityRemark selectRemarkById(ActivityRemark remark);
     int updateRemarkById(ActivityRemark remark);
-    int deleteRemarkByActivityId(ActivityRemark remark);
+    int deleteRemarkByActivityId(String activityId);
 }

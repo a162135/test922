@@ -12,4 +12,6 @@ public interface ActivityDao {
     int updateActivity(Activity activity);
     Activity selectActivityById(Activity activity);
     List<Activity> selectAllById(Activity activity);
+    List<Activity> selectAll();
+
 }
