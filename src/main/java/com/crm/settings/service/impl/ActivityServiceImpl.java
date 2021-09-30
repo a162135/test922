@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ActivityServiceImpl implements ActivityService {
@@ -77,7 +78,12 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public List<Activity> queryActivityAll() {
-        return activityDao.selectAll();
+    public List<Activity> queryActivityAll(Map<String,String> map) {
+        return activityDao.selectAll(map);
+    }
+
+    @Override
+    public List<Activity> queryActivityAll2(Map<String,String> map) {
+        return activityDao.selectAll2(map);
     }
 }

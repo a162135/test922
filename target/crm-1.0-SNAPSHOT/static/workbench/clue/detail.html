@@ -47,23 +47,8 @@
 			$(this).children("span").css("color","#E6E6E6");
 		});
 
-		$.ajax({
-			url:"/crm/activity/queryActivityAll.do",
-			dataType:"json",
-			success:function (data){
-				var html = "";
-				for (var i = 0; i < data.length; i++) {
-					html += "<tr>\n" +
-							"\t\t\t\t\t\t\t\t<td><input value='"+data[i].id+"' type=\"checkbox\"/></td>\n" +
-							"\t\t\t\t\t\t\t\t<td>"+data[i].name+"</td>\n" +
-							"\t\t\t\t\t\t\t\t<td>"+data[i].startDate+"</td>\n" +
-							"\t\t\t\t\t\t\t\t<td>"+data[i].endDate+"</td>\n" +
-							"\t\t\t\t\t\t\t\t<td>"+data[i].owner+"</td>\n" +
-							"\t\t\t\t\t\t\t</tr>";
-				}
-				$("#activityTbody").html(html);
-			}
-		})
+		queryActivityModalData();
+		queryBund();
 	});
 	function doBundMadal(){
 		$("#bundModal").modal("show");
@@ -91,6 +76,7 @@
 				if (data.success){
 					//刷新
 					$("#bundModal").modal("hide");
+					queryActivityModalData();
 					queryBund();
 				} else {
 					alert("关联失败");
@@ -99,6 +85,30 @@
 		})
 	}
 
+	function queryActivityModalData(){
+		$.ajax({
+			url:"/crm/activity/queryActivityAll.do",
+			async:false,
+			data:{
+				"clueId":$("#clueId").val(),
+				"name":$("#query-activityName").val().trim()
+			},
+			dataType:"json",
+			success:function (data){
+				var html = "";
+				for (var i = 0; i < data.length; i++) {
+					html += "<tr>\n" +
+							"\t\t\t\t\t\t\t\t<td><input value='"+data[i].id+"' type=\"checkbox\"/></td>\n" +
+							"\t\t\t\t\t\t\t\t<td>"+data[i].name+"</td>\n" +
+							"\t\t\t\t\t\t\t\t<td>"+data[i].startDate+"</td>\n" +
+							"\t\t\t\t\t\t\t\t<td>"+data[i].endDate+"</td>\n" +
+							"\t\t\t\t\t\t\t\t<td>"+data[i].owner+"</td>\n" +
+							"\t\t\t\t\t\t\t</tr>";
+				}
+				$("#activityTbody").html(html);
+			}
+		})
+	}
 	function queryBund(){
 		$.ajax({
 			url:"/crm/clue/queryBund.do",
@@ -107,17 +117,54 @@
 			},
 			dataType:"json",
 			success:function (data){
-				var html;
+				var html = "";
 				for (var i = 0; i < data.length; i++) {
 					html += "<tr>\n" +
 							"\t\t\t\t\t\t\t<td>"+data[i].name+"</td>\n" +
 							"\t\t\t\t\t\t\t<td>"+data[i].startDate+"</td>\n" +
 							"\t\t\t\t\t\t\t<td>"+data[i].endDate+"</td>\n" +
 							"\t\t\t\t\t\t\t<td>"+data[i].owner+"</td>\n" +
-							"\t\t\t\t\t\t\t<td><a href=\"javascript:void(0);\"  style=\"text-decoration: none;\"><span class=\"glyphicon glyphicon-remove\"></span>解除关联</a></td>\n" +
+							"\t\t\t\t\t\t\t<td><a href=\"javascript:void(0);\" onclick='removeBund(\""+data[i].id+"\")'  style=\"text-decoration: none;\"><span class=\"glyphicon glyphicon-remove\"></span>解除关联</a></td>\n" +
 							"\t\t\t\t\t\t</tr>"
 				}
 				$("#activityBund").html(html);
+			}
+		})
+	}
+	function removeBund(id){
+		if(window.confirm("确定接触关联吗？")){
+			$.ajax({
+				url:"/crm/clue/removeBund.do",
+				data:{
+					"id":id
+				},
+				dataType:"json",
+				type:"post",
+				success:function (data){
+					if(data.success){
+						queryActivityModalData();
+						queryBund();
+					} else {
+						alert("解除失败");
+					}
+				}
+			})
+		}
+	}
+
+	function doRetweet(){
+		$.ajax({
+			url:"/crm/util/setAttributeString.do",
+			data:{
+				name:"clueId",
+				data:$("#clueId").val()
+			},
+			dataType:"json",
+			type:"post",
+			success:function (data){
+				if (data.success){
+					window.location.href='convert.html';
+				}
 			}
 		})
 	}
@@ -126,7 +173,7 @@
 
 </head>
 <body>
-	<input id="clueId" type="hidden" value="3aae7e1fabf44256854d00f7fb2da716">
+	<input id="clueId" type="hidden" value="03b8365517ca4fa3864ef90360b84b4b">
 f
 	<!-- 关联市场活动的模态窗口 -->
 	<div class="modal fade" id="bundModal" role="dialog">
@@ -142,7 +189,7 @@ f
 					<div class="btn-group" style="position: relative; top: 18%; left: 8px;">
 						<form class="form-inline" role="form">
 						  <div class="form-group has-feedback">
-						    <input type="text" class="form-control" style="width: 300px;" placeholder="请输入市场活动名称，支持模糊查询">
+						    <input type="text" class="form-control" onblur="queryActivityModalData()" id="query-activityName" style="width: 300px;" placeholder="请输入市场活动名称，支持模糊查询">
 						    <span class="glyphicon glyphicon-search form-control-feedback"></span>
 						  </div>
 						</form>
@@ -351,7 +398,7 @@ f
 			<h3>李四先生 <small>动力节点</small></h3>
 		</div>
 		<div style="position: relative; height: 50px; width: 500px;  top: -72px; left: 700px;">
-			<button type="button" class="btn btn-default" onclick="window.location.href='convert.html';"><span class="glyphicon glyphicon-retweet"></span> 转换</button>
+			<button type="button" class="btn btn-default" onclick="doRetweet()"><span class="glyphicon glyphicon-retweet"></span> 转换</button>
 			<button type="button" class="btn btn-default" data-toggle="modal" data-target="#editClueModal"><span class="glyphicon glyphicon-edit"></span> 编辑</button>
 			<button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
 		</div>

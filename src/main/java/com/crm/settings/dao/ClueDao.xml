@@ -4,8 +4,9 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.crm.settings.dao.ClueDao">
     <select id="selectActivity" resultType="com.crm.settings.domain.Activity">
-        select a.id,a.name,a.startDate,a.endDate,u.name as owner
-        from tbl_activity a join tbl_user u on a.owner = u.id where
+        select r.id,a.name,a.startDate,a.endDate,u.name as owner
+        from tbl_activity a join tbl_user u on a.owner = u.id
+        join tbl_clue_activity_relation r on a.id = r.activityId where
         a.id in (select activityId from tbl_clue_activity_relation where clueId = #{clueId})
     </select>
     <insert id="insertBund">
@@ -51,4 +52,22 @@
                 #{nextContactTime},
                 #{address})
     </insert>
+    <delete id="deleteBund">
+        delete from tbl_clue_activity_relation where id = #{id}
+    </delete>
+
+    <select id="selectById" resultType="com.crm.settings.domain.Clue">
+        select c.id,c.fullname,d.value as appellation,c.company
+        from tbl_clue c join tbl_dic_value d on c.appellation = d.id
+            where c.id = #{id}
+    </select>
+
+    <select id="selectAllById" resultType="com.crm.settings.domain.Clue">
+        select * from tbl_clue
+        where id = #{id}
+    </select>
+
+    <delete id="deleteById">
+        delete from tbl_clue where id = #{id}
+    </delete>
 </mapper>

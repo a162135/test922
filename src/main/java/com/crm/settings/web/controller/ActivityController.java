@@ -144,8 +144,20 @@ public class ActivityController {
 
     @RequestMapping(value = "/activity/queryActivityAll.do")
     @ResponseBody
-    public List<Activity> queryAllById(){
-        return service.queryActivityAll();
+    public List<Activity> queryAllById(String clueId,String name){
+        Map<String,String> map = new HashMap<>();
+        map.put("clueId",clueId);
+        map.put("name",name);
+        return service.queryActivityAll(map);
+    }
+
+    @RequestMapping(value = "/activity/queryActivityAll2.do")
+    @ResponseBody
+    public List<Activity> queryAllById2(String clueId,String name){
+        Map<String,String> map = new HashMap<>();
+        map.put("clueId",clueId);
+        map.put("name",name);
+        return service.queryActivityAll2(map);
     }
 
 }

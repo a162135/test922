@@ -3,6 +3,7 @@ package com.crm.settings.dao;
 import com.crm.settings.domain.Activity;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ActivityDao {
     int insertActivity(Activity activity);
@@ -12,6 +13,7 @@ public interface ActivityDao {
     int updateActivity(Activity activity);
     Activity selectActivityById(Activity activity);
     List<Activity> selectAllById(Activity activity);
-    List<Activity> selectAll();
+    List<Activity> selectAll(Map<String,String> map);
+    List<Activity> selectAll2(Map<String,String> map);
 
 }

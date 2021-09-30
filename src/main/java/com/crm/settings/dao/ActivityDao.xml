@@ -72,6 +72,20 @@
         where a.id = #{id}
     </select>
     <select id="selectAll" resultType="com.crm.settings.domain.Activity">
-        select * from tbl_activity
+        select a.id,a.name,a.startDate,a.endDate,u.name as owner from tbl_activity a join tbl_user u on a.owner = u.id
+        <where>
+            a.id not in (select activityId from tbl_clue_activity_relation where clueId=#{clueId})
+            <if test="name != null and name != ''">
+                and a.name like '%' #{name} '%'
+            </if>
+        </where>
+    </select>
+    <select id="selectAll2" resultType="com.crm.settings.domain.Activity">
+        select a.id,a.name,a.startDate,a.endDate,u.name as owner from tbl_activity a join tbl_user u on a.owner = u.id
+        <where>
+            <if test="name != null and name != ''">
+                and a.name like '%' #{name} '%'
+            </if>
+        </where>
     </select>
 </mapper>

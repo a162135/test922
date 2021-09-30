@@ -1,10 +1,12 @@
 package com.crm.settings.service.impl;
 
 import com.crm.settings.dao.ClueDao;
-import com.crm.settings.domain.Activity;
-import com.crm.settings.domain.Clue;
-import com.crm.settings.domain.ClueActivityRelation;
+import com.crm.settings.dao.ContactsDao;
+import com.crm.settings.dao.CustomerDao;
+import com.crm.settings.dao.TranDao;
+import com.crm.settings.domain.*;
 import com.crm.settings.service.ClueService;
+import com.crm.utils.DateTimeUtil;
 import com.crm.utils.UUIDUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,12 @@ public class ClueServiceImpl implements ClueService {
 
     @Resource
     private ClueDao dao;
+    @Resource
+    private CustomerDao customerDao;
+    @Resource
+    private ContactsDao contactsDao;
+    @Resource
+    private TranDao tranDao;
 
     @Override
     public int addClue(Clue clue) {
@@ -45,4 +53,76 @@ public class ClueServiceImpl implements ClueService {
         List<Activity> list = dao.selectActivity(relation);
         return list;
     }
+
+    @Override
+    public int removeBund(ClueActivityRelation relation) {
+        return dao.deleteBund(relation);
+    }
+
+    @Override
+    public Clue queryClueById(String id) {
+         return dao.selectById(id);
+    }
+
+    @Transactional
+    @Override
+    public boolean retweet(String id,Tran tran) {
+        boolean yes = true;
+        Clue clue = dao.selectAllById(id);
+        String customerId = UUIDUtil.getUUID();
+        Contacts contacts = new Contacts();
+        contacts.setId(UUIDUtil.getUUID());
+        contacts.setCreateTime(DateTimeUtil.getSysTime());
+        contacts.setCreateBy(clue.getCreateBy());
+        contacts.setFullname(clue.getFullname());
+        contacts.setAppellation(clue.getAppellation());
+        contacts.setOwner(clue.getOwner());
+        contacts.setJob(clue.getJob());
+        contacts.setEmail(clue.getEmail());
+        contacts.setMphone(clue.getMphone());
+        contacts.setSource(clue.getSource());
+        contacts.setContactSummary(clue.getContactSummary());
+        contacts.setNextContactTime(clue.getNextContactTime());
+        contacts.setAddress(clue.getAddress());
+        contacts.setCustomerId(customerId);
+        if (contactsDao.insert(contacts) <= 0){
+            yes = false;
+        }
+
+
+        Customer customer = new Customer();
+        customer.setId(customerId);
+        customer.setCreateTime(DateTimeUtil.getSysTime());
+        customer.setCreateBy(clue.getCreateBy());
+        customer.setOwner(clue.getOwner());
+        customer.setName(clue.getCompany());
+        customer.setPhone(clue.getPhone());
+        customer.setWebsite(clue.getWebsite());
+        customer.setNextContactTime(clue.getNextContactTime());
+        customer.setAddress(clue.getAddress());
+        if (customerDao.insert(customer) <= 0){
+            yes = false;
+        }
+
+        if (tran != null && tran.getName() != null){
+            tran.setOwner(clue.getOwner());
+            tran.setContactsId(contacts.getId());
+            tran.setCustomerId(customer.getId());
+            tran.setId(customerId);
+            tran.setCreateTime(DateTimeUtil.getSysTime());
+            tran.setCreateBy(clue.getCreateBy());
+            if (tranDao.insert(tran) <= 0){
+                yes = false;
+            }
+        }
+
+        if (dao.deleteById(id) <= 0){
+            yes = false;
+        }
+
+
+        return yes;
+    }
+
+
 }

@@ -10,4 +10,9 @@ public interface ClueDao{
     int insert(Clue clue);
     int insertBund(ClueActivityRelation relation);
     List<Activity> selectActivity(ClueActivityRelation relation);
+    int deleteBund(ClueActivityRelation relation);
+    Clue selectById(String id);
+    Clue selectAllById(String id);
+
+    int deleteById(String id);
 }

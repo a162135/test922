@@ -4,6 +4,7 @@ import com.crm.settings.domain.Activity;
 import com.crm.settings.vo.Page;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ActivityService {
     int saveActivity(Activity activity);
@@ -15,5 +16,6 @@ public interface ActivityService {
     Activity queryActivityById(Activity activity);
 
     List<Activity> queryAllById(Activity activity);
-    List<Activity> queryActivityAll();
+    List<Activity> queryActivityAll(Map<String,String> map);
+    List<Activity> queryActivityAll2(Map<String,String> map);
 }
