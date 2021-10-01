@@ -45,6 +45,29 @@
 				})
 			}
 		})
+
+		$.ajax({
+			url:"/crm/util/getDic.do",
+			dataType:"json",
+			success:function (dic){
+				dic = dic.stage;
+				var html = "<option></option>";
+				for (var i = 0; i < dic.length; i++) {
+					html += "<option value='"+dic[i].id+"'>"+dic[i].value+"</option>";
+				}
+				$("#stage").html(html);
+			}
+		})
+        $.ajax({
+            url:"/crm/util/getAttribute.do",
+            data:{
+                "name":"user"
+            },
+            dataType:"json",
+            success:function (data){
+                $("#createBy").val(data.name);
+            }
+        })
 	});
 
 	function retweet(){
@@ -66,6 +89,7 @@
 				return;
 			}
 		}
+		dataJson.createBy = $("#createBy").val()
 		dataJson.id = $("#clueId").val();
 
 		$.ajax({
@@ -118,6 +142,7 @@
 <body>
 	<input type="hidden" id="clueId">
 	<input type="hidden" id="activity2">
+    <input type="hidden" id="createBy">
 	
 	<!-- 搜索市场活动的模态窗口 -->
 	<div class="modal fade" id="searchActivityModal" role="dialog" >

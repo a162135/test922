@@ -5,9 +5,8 @@
 <mapper namespace="com.crm.settings.dao.ClueDao">
     <select id="selectActivity" resultType="com.crm.settings.domain.Activity">
         select r.id,a.name,a.startDate,a.endDate,u.name as owner
-        from tbl_activity a join tbl_user u on a.owner = u.id
-        join tbl_clue_activity_relation r on a.id = r.activityId where
-        a.id in (select activityId from tbl_clue_activity_relation where clueId = #{clueId})
+        from tbl_clue_activity_relation r join tbl_activity a on r.activityId = a.id
+        join tbl_user u on a.owner = u.id where r.clueId = #{clueId}
     </select>
     <insert id="insertBund">
         insert into tbl_clue_activity_relation values
@@ -69,5 +68,14 @@
 
     <delete id="deleteById">
         delete from tbl_clue where id = #{id}
+    </delete>
+
+    <select id="selectBund" resultType="com.crm.settings.domain.ClueActivityRelation">
+        select * from tbl_clue_activity_relation
+        where clueId = #{clueId}
+    </select>
+    <delete id="deleteBund2">
+        delete from tbl_clue_activity_relation
+        where clueId = #{clueId}
     </delete>
 </mapper>

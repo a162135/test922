@@ -6,13 +6,189 @@
 <link href="../../jquery/bootstrap_3.3.0/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
 <link href="../../jquery/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet" />
 
-<script type="text/javascript" src="../../jquery/jquery-1.11.1-min.js"></script>
+<script type="text/javascript" src="../../jquery/jquery-3.4.1.js"></script>
+<script type="text/javascript" src="../../js/crmUtil.js"></script>
 <script type="text/javascript" src="../../jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../../jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
 <script type="text/javascript" src="../../jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js"></script>
+<script type="text/javascript">
+	$(function (){
+		clearState();
+	})
 
+	function doSave(){
+		var formClass = [
+				new FormClass("所有者","create-transactionOwner"),
+				new FormClass("名称","create-transactionName"),
+				new FormClass("预计成交日期","create-expectedClosingDate"),
+				new FormClass("客户名称","create-accountName"),
+				new FormClass("阶段","create-transactionStage")
+		];
+		if (!crmUtil.notNull(formClass)){
+			return false;
+		}
+		$.ajax({
+			url:"/crm/tran/addTran.do",
+			data:{
+				"owner":$("#create-transactionOwner").val().trim(),
+				"money":$("#create-amountOfMoney").val().trim(),
+				"name":$("#create-transactionName").val().trim(),
+				"expectedDate":$("#create-expectedClosingDate").val().trim(),
+				"customerId":$("#create-accountName2").val().trim(),
+				"customerName":$("#create-accountName").val().trim(),
+				"stage":$("#create-transactionStage").val().trim(),
+				"type":$("#create-transactionType").val().trim(),
+				"source":$("#create-clueSource").val().trim(),
+				"activityId":$("#create-activitySrc2").val().trim(),
+				"contactsId":$("#create-contactsName2").val().trim(),
+				"description":$("#create-describe").val().trim(),
+				"contactSummary":$("#create-contactSummary").val().trim(),
+				"nextContactTime":$("#create-nextContactTime").val().trim(),
+				"createBy":$("#create-createBy").val()
+			},
+			dataType:"json",
+			type:"post",
+			success:function (data){
+				if (data.success){
+					window.location.href = "index.html";
+				} else {
+					alert("保存失败");
+				}
+			}
+		})
+	}
+
+	function clearState(){
+		$.ajax({
+			url:"/crm/tran/getOwner.do",
+			dataType:"json",
+			success:function (data){
+				var html = "";
+				for (var i = 0; i < data.length; i++) {
+					html += "<option value='"+data[i].id+"'>"+data[i].name+"</option>";
+				}
+				$("#create-transactionOwner").html(html);
+			},
+			async:false
+		})
+		$.ajax({
+			url:"/crm/util/getDic.do",
+			dataType:"json",
+			success:function (dic){
+				var data = dic.stage;
+				var html = "<option></option>";
+				for (var i = 0; i < data.length; i++) {
+					html += "<option value='"+data[i].id+"'>"+data[i].value+"</option>";
+				}
+				$("#create-transactionStage").html(html);
+
+				data = dic.transactionType;
+				html = "<option></option>";
+				for (var i = 0; i < data.length; i++) {
+					html += "<option value='"+data[i].id+"'>"+data[i].value+"</option>";
+				}
+				$("#create-transactionType").html(html);
+
+				data = dic.source;
+				html = "<option></option>";
+				for (var i = 0; i < data.length; i++) {
+					html += "<option value='"+data[i].id+"'>"+data[i].value+"</option>";
+				}
+				$("#create-clueSource").html(html);
+			},
+			async:false
+		})
+		$.ajax({
+			url:"/crm/util/getAttribute.do",
+			data:{
+				"name":"user"
+			},
+			success:function (data){
+				$("#create-createBy").val(data.name);
+			},
+			async:false
+		})
+	}
+
+	function doActivity(){
+		$.ajax({
+			url:"/crm/tran/queryActivity.do",
+			data:{
+				"name":$("#activityLike").val().trim()
+			},
+			dataType:"json",
+			success:function (data){
+				var html = "";
+				for (var i = 0; i < data.length; i++) {
+					html += "<tr>\n" +
+							"\t\t\t\t\t\t\t\t<td><input type=\"radio\" onclick='activityCheckbox(\""+data[i].id+"\",\""+data[i].name+"\")' name=\"activity\"/></td>\n" +
+							"\t\t\t\t\t\t\t\t<td>"+data[i].name+"</td>\n" +
+							"\t\t\t\t\t\t\t\t<td>"+data[i].startDate+"</td>\n" +
+							"\t\t\t\t\t\t\t\t<td>"+data[i].endDate+"</td>\n" +
+							"\t\t\t\t\t\t\t\t<td>"+data[i].owner+"</td>\n" +
+							"\t\t\t\t\t\t\t</tr>"
+				}
+				$("#activityTbody").html(html);
+			}
+		})
+	}
+
+	function activityCheckbox(id,name){
+		$("#create-activitySrc").val(name);
+		$("#create-activitySrc2").val(id);
+		$("#findMarketActivity").modal("hide");
+	}
+
+	function doContacts(){
+		$.ajax({
+			url:"/crm/tran/queryContacts.do",
+			data:{
+				"name":$("#contactsLike").val().trim()
+			},
+			dataType:"json",
+			success:function (data){
+				var html = "";
+				for (var i = 0; i < data.length; i++) {
+					html += "<tr>\n" +
+							"\t\t\t\t\t\t\t\t<td><input type=\"radio\" onclick='contactsCheckbox(\""+data[i].id+"\",\""+data[i].fullname+"\")' name=\"activity\"/></td>\n" +
+							"\t\t\t\t\t\t\t\t<td>"+data[i].fullname+"</td>\n" +
+							"\t\t\t\t\t\t\t\t<td>"+data[i].email+"</td>\n" +
+							"\t\t\t\t\t\t\t\t<td>"+data[i].mphone+"</td>\n" +
+							"\t\t\t\t\t\t\t</tr>"
+				}
+				$("#contactsTbody").html(html);
+			}
+		})
+	}
+
+	function contactsCheckbox(id,fullName){
+		$("#create-contactsName").val(fullName);
+		$("#create-contactsName2").val(id);
+		$("#findContacts").modal("hide");
+	}
+
+	function doAccountName(event){
+		if (event.keyCode === 13){
+			$.ajax({
+				url:"/crm/tran/queryAccount.do",
+				data:{
+					"name":$("#create-accountName").val().trim()
+				},
+				success:function (data){
+					$("#create-accountName").val(data.name);
+					$("#create-accountName2").val(data.id);
+
+				}
+			})
+		}
+	}
+</script>
 </head>
 <body>
+	<input type="hidden" id="create-activitySrc2">
+	<input type="hidden" id="create-contactsName2">
+	<input type="hidden" id="create-accountName2">
+	<input type="hidden" id="create-createBy">
 
 	<!-- 查找市场活动 -->	
 	<div class="modal fade" id="findMarketActivity" role="dialog">
@@ -28,7 +204,7 @@
 					<div class="btn-group" style="position: relative; top: 18%; left: 8px;">
 						<form class="form-inline" role="form">
 						  <div class="form-group has-feedback">
-						    <input type="text" class="form-control" style="width: 300px;" placeholder="请输入市场活动名称，支持模糊查询">
+						    <input type="text" id="activityLike" onblur="doActivity()" class="form-control" style="width: 300px;" placeholder="请输入市场活动名称，支持模糊查询">
 						    <span class="glyphicon glyphicon-search form-control-feedback"></span>
 						  </div>
 						</form>
@@ -43,7 +219,7 @@
 								<td>所有者</td>
 							</tr>
 						</thead>
-						<tbody>
+						<tbody id="activityTbody">
 							<tr>
 								<td><input type="radio" name="activity"/></td>
 								<td>发传单</td>
@@ -79,7 +255,7 @@
 					<div class="btn-group" style="position: relative; top: 18%; left: 8px;">
 						<form class="form-inline" role="form">
 						  <div class="form-group has-feedback">
-						    <input type="text" class="form-control" style="width: 300px;" placeholder="请输入联系人名称，支持模糊查询">
+						    <input type="text" id="contactsLike" onblur="doContacts()" class="form-control" style="width: 300px;" placeholder="请输入联系人名称，支持模糊查询">
 						    <span class="glyphicon glyphicon-search form-control-feedback"></span>
 						  </div>
 						</form>
@@ -93,7 +269,7 @@
 								<td>手机</td>
 							</tr>
 						</thead>
-						<tbody>
+						<tbody id="contactsTbody">
 							<tr>
 								<td><input type="radio" name="activity"/></td>
 								<td>李四</td>
@@ -117,7 +293,7 @@
 	<div style="position:  relative; left: 30px;">
 		<h3>创建交易</h3>
 	  	<div style="position: relative; top: -40px; left: 70%;">
-			<button type="button" class="btn btn-primary">保存</button>
+			<button type="button" class="btn btn-primary" onclick="doSave()">保存</button>
 			<button type="button" class="btn btn-default">取消</button>
 		</div>
 		<hr style="position: relative; top: -40px;">
@@ -152,7 +328,7 @@
 		<div class="form-group">
 			<label for="create-accountName" class="col-sm-2 control-label">客户名称<span style="font-size: 15px; color: red;">*</span></label>
 			<div class="col-sm-10" style="width: 300px;">
-				<input type="text" class="form-control" id="create-accountName" placeholder="支持自动补全，输入客户不存在则新建">
+				<input type="text" class="form-control" id="create-accountName" onkeyup="doAccountName(event)"  placeholder="支持自动补全，输入客户不存在则新建">
 			</div>
 			<label for="create-transactionStage" class="col-sm-2 control-label">阶段<span style="font-size: 15px; color: red;">*</span></label>
 			<div class="col-sm-10" style="width: 300px;">
@@ -207,16 +383,16 @@
 				  <option>聊天</option>
 				</select>
 			</div>
-			<label for="create-activitySrc" class="col-sm-2 control-label">市场活动源&nbsp;&nbsp;<a href="javascript:void(0);" data-toggle="modal" data-target="#findMarketActivity"><span class="glyphicon glyphicon-search"></span></a></label>
+			<label for="create-activitySrc" class="col-sm-2 control-label">市场活动源&nbsp;&nbsp;<a href="javascript:void(0);" onclick="doActivity()" data-toggle="modal" data-target="#findMarketActivity"><span class="glyphicon glyphicon-search"></span></a></label>
 			<div class="col-sm-10" style="width: 300px;">
-				<input type="text" class="form-control" id="create-activitySrc">
+				<input type="text" disabled class="form-control" id="create-activitySrc">
 			</div>
 		</div>
 		
 		<div class="form-group">
-			<label for="create-contactsName" class="col-sm-2 control-label">联系人名称&nbsp;&nbsp;<a href="javascript:void(0);" data-toggle="modal" data-target="#findContacts"><span class="glyphicon glyphicon-search"></span></a></label>
+			<label for="create-contactsName" class="col-sm-2 control-label">联系人名称&nbsp;&nbsp;<a href="javascript:void(0);" onclick="doContacts()" data-toggle="modal" data-target="#findContacts"><span class="glyphicon glyphicon-search"></span></a></label>
 			<div class="col-sm-10" style="width: 300px;">
-				<input type="text" class="form-control" id="create-contactsName">
+				<input type="text" disabled class="form-control" id="create-contactsName">
 			</div>
 		</div>
 		

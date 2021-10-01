@@ -32,4 +32,15 @@
                 #{description},
                 #{address})
     </insert>
+
+    <select id="selectByName" parameterType="string" resultType="com.crm.settings.domain.Customer">
+        select * from tbl_customer
+        <where>
+            <if test="name != null and name != ''">
+                and name like '%' #{name} '%'
+            </if>
+        </where>
+        limit 1
+    </select>
+
 </mapper>

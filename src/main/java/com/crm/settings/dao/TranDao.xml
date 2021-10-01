@@ -42,4 +42,14 @@
                 #{contactSummary},
                 #{nextContactTime})
     </insert>
+    <insert id="insertHistory">
+        insert into tbl_tran_history
+        values (#{id},
+                #{stage},
+                #{money},
+                #{expectedDate},
+                #{createTime},
+                #{createBy},
+                #{tranId})
+    </insert>
 </mapper>

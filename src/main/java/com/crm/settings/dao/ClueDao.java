@@ -15,4 +15,7 @@ public interface ClueDao{
     Clue selectAllById(String id);
 
     int deleteById(String id);
+
+    List<ClueActivityRelation> selectBund(String clueId);
+    int deleteBund2(String clueId);
 }

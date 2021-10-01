@@ -42,4 +42,17 @@
                 #{nextContactTime},
                 #{address})
     </insert>
+    <insert id="insertBund">
+        insert into tbl_contacts_activity_relation
+        values (#{id},#{contactsId},#{activityId})
+    </insert>
+
+    <select id="selectListByName" parameterType="string" resultType="com.crm.settings.domain.Contacts">
+        select * from tbl_contacts
+        <where>
+            <if test="name != null and name != ''">
+                and name like '%' #{name} '%'
+            </if>
+        </where>
+    </select>
 </mapper>

@@ -88,4 +88,13 @@
             </if>
         </where>
     </select>
+
+    <select id="selectListByName" parameterType="string" resultType="com.crm.settings.domain.Activity">
+        select a.id,a.name,u.name as owner,a.startDate,a.endDate from tbl_activity a join tbl_user u on a.owner = u.id
+        <where>
+            <if test="name != null and name != ''">
+                and a.name like '%' #{name} '%'
+            </if>
+        </where>
+    </select>
 </mapper>

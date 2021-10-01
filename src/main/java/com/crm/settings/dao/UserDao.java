@@ -10,4 +10,5 @@ public interface UserDao {
     User selectUserLogin(User user);
     String selectIdByName(String loginAct);
     List<Activity> selectIdAndName();
+    List<User> selectUser();
 }
