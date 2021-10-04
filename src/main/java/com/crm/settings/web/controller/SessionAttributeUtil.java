@@ -42,4 +42,10 @@ public class SessionAttributeUtil {
     public Map<String, List<DicValue>> getDic(HttpServletRequest request){
         return (Map<String, List<DicValue>>) request.getServletContext().getAttribute("dic");
     }
+
+    @RequestMapping(value = "/util/getStage.do")
+    @ResponseBody
+    public Map<String, String> getStage(HttpServletRequest request){
+        return (Map<String, String>) request.getServletContext().getAttribute("stage");
+    }
 }

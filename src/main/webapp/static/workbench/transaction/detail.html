@@ -25,6 +25,10 @@
 
 	//默认情况下取消和保存按钮是隐藏的
 	var cancelAndSaveBtnDefault = true;
+	var stage;
+	var stageTemp;
+	var money;
+	var expectedDate;
 	
 	$(function(){
 		$("#remark").focus(function(){
@@ -82,15 +86,203 @@
                         }
                     }, 100);
                 });
+
+		clearTran();
 	});
 	
-	
+	function clearTran(){
+		$.ajax({
+			url:"/crm/util/getStage.do",
+			dataType:"json",
+			success:function (data){
+				stage = data;
+			},
+			async:false
+		})
+		$.ajax({
+			url:"/crm/tran/queryAllById.do",
+			data:{
+				"id":$("#tranId").val()
+			},
+			dataType:"json",
+			async:false,
+			success:function (data){
+				$("#query-owner").html(data.owner);
+				$("#query-money").html(data.money);
+				$("#query-name").html(data.name);
+				$("#query-expectedDate").html(data.expectedDate);
+				$("#query-customerId").html(data.customerId);
+				$("#query-stage").html(data.stage);
+				$("#query-type").html(data.type);
+				$("#query-source").html(data.source);
+				$("#query-activityId").html(data.activityId);
+				$("#query-contactsId").html(data.contactsId);
+				$("#query-createBy").html(data.createBy);
+				$("#query-createTime").html(data.createTime);
+				$("#query-editBy").html(data.editBy);
+				$("#query-editTime").html(data.editTime);
+				$("#query-description").html(data.description);
+				$("#query-contactSummary").html(data.contactSummary);
+				$("#query-nextContactTime").html(data.nextContactTime);
+				$("#query-stage2").html(stage[data.stage]);
+                stageTemp = data.stage;
+				money =  data. money;
+				expectedDate = data.expectedDate;
+
+			}
+		})
+
+		$.ajax({
+			url:"/crm/tran/queryHistory.do",
+			async:false,
+			data:{
+				"tranId":$("#tranId").val()
+			},
+			dataType:"json",
+			success:function (data){
+				var html = "";
+				for (var i = 0; i < data.length; i++) {
+					data[i].stage2 = stage[data[i].stage];
+					html += "<tr>\n" +
+							"\t\t\t\t\t\t\t<td>"+data[i].stage+"</td>\n" +
+							"\t\t\t\t\t\t\t<td>"+data[i].money+"</td>\n" +
+							"\t\t\t\t\t\t\t<td>"+data[i].stage2+"</td>\n" +
+							"\t\t\t\t\t\t\t<td>"+data[i].expectedDate+"</td>\n" +
+							"\t\t\t\t\t\t\t<td>"+data[i].createTime+"</td>\n" +
+							"\t\t\t\t\t\t\t<td>"+data[i].createBy+"</td>\n" +
+							"\t\t\t\t\t\t</tr>";
+				}
+				$("#historyTbody").html(html);
+			}
+		})
+		$.ajax({
+			url:"/crm/util/getAttribute.do",
+			dataType:"json",
+			success:function(data){
+				$("#editBy").val(data.name);
+			},
+			async:false,
+			data:{
+				"name":"user"
+			}
+		})
+
+
+		displayStage();
+
+	}
+
+	function displayStage(){
+		$.ajax({
+			url:"/crm/tran/queryStage.do",
+			dataType:"json",
+			success:function (data){
+				//找分界点
+				var j = 0;
+				for (var i = 0; i < data.length; i++) {
+					if (stage[data[i].value] === "0"){
+						break;
+					} else {
+						j += 1;
+					}
+				}
+				//展示
+				var html = "";
+				var flag = false;
+				for (var i = 0; i < data.length; i++) {
+					if (i >= j){
+						//可能性0
+						if (data[i].value === stageTemp){
+							html += "<span class=\"glyphicon glyphicon-remove mystage\" style='color: red' id='"+data[i].value+"' data-toggle=\"popover\" data-placement=\"bottom\" data-content=\""+data[i].value+"\"></span>\n";
+						} else {
+							html += "<span class=\"glyphicon glyphicon-remove mystage\" id='"+data[i].value+"' data-toggle=\"popover\" data-placement=\"bottom\" data-content=\""+data[i].value+"\"></span>\n";
+						}
+					} else {
+						//可能性大于0
+						if (stage[stageTemp] === "0"){
+							html += "<span class=\"glyphicon glyphicon-record mystage\" id='"+data[i].value+"' data-toggle=\"popover\" data-placement=\"bottom\" data-content=\""+data[i].value+"\"></span>\n";
+						} else if (flag){
+							html += "<span class=\"glyphicon glyphicon-record mystage\" id='"+data[i].value+"' data-toggle=\"popover\" data-placement=\"bottom\" data-content=\""+data[i].value+"\"></span>\n";
+						} else {
+							if (data[i].value === stageTemp){
+								html += "<span class=\"glyphicon glyphicon-map-marker mystage\" style='color: #90F790' id='"+data[i].value+"' data-toggle=\"popover\" data-placement=\"bottom\" data-content=\""+data[i].value+"\"></span>\n";
+								flag = true;
+							} else {
+								html += "<span class=\"glyphicon glyphicon-ok-circle mystage\" style='color: #90F790' id='"+data[i].value+"' data-toggle=\"popover\" data-placement=\"bottom\" data-content=\""+data[i].value+"\"></span>\n";
+							}
+						}
+					}
+					html += "\t\t-----------";
+				}
+				$("#stageSpan").html(html);
+				//绑定点击事件
+				$(".mystage").on("click",function (){
+					if (this.id === stageTemp){
+						return false;
+					}
+					stageTemp = this.id;
+					$.ajax({
+						url:"/crm/tran/setStage.do",
+						data:{
+							"stage":this.id,
+							"id":$("#tranId").val(),
+							"editBy":$("#editBy").val(),
+							"money":money,
+							"expectedDate":expectedDate
+						},
+						success:function (data){
+							if (data.success){
+								clearTran();
+							}
+						}
+					})
+				})
+				//重新绑定阶段
+				$(".mystage").popover({
+					trigger:'manual',
+					placement : 'bottom',
+					html: 'true',
+					animation: false
+				}).on("mouseenter", function () {
+					var _this = this;
+					$(this).popover("show");
+					$(this).siblings(".popover").on("mouseleave", function () {
+						$(_this).popover('hide');
+					});
+				}).on("mouseleave", function () {
+					var _this = this;
+					setTimeout(function () {
+						if (!$(".popover:hover").length) {
+							$(_this).popover("hide")
+						}
+					}, 100);
+				});
+			}
+		})
+	}
+	function doEdit(){
+		$.ajax({
+			url:"/crm/util/setAttributeString.do",
+			data:{
+				"name":"tranId",
+				"data":$("#tranId").val()
+			},
+			dataType:"json",
+			success:function (data){
+				if (data.success){
+					window.location.href='edit.html';
+				}
+			}
+		})
+	}
 	
 </script>
 
 </head>
 <body>
-	
+	<input value="c847682d61974d029d669ed1c3436614" type="hidden" id="tranId">
+	<input type="hidden" id="editBy">
+
 	<!-- 返回按钮 -->
 	<div style="position: relative; top: 35px; left: 10px;">
 		<a href="javascript:void(0);" onclick="window.history.back();"><span class="glyphicon glyphicon-arrow-left" style="font-size: 20px; color: #DDDDDD"></span></a>
@@ -102,14 +294,15 @@
 			<h3>动力节点-交易01 <small>￥5,000</small></h3>
 		</div>
 		<div style="position: relative; height: 50px; width: 250px;  top: -72px; left: 700px;">
-			<button type="button" class="btn btn-default" onclick="window.location.href='edit.html';"><span class="glyphicon glyphicon-edit"></span> 编辑</button>
+			<button type="button" class="btn btn-default" onclick="doEdit()"><span class="glyphicon glyphicon-edit"></span> 编辑</button>
 			<button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
 		</div>
 	</div>
 
 	<!-- 阶段状态 -->
-	<div style="position: relative; left: 40px; top: -50px;">
+	<div id="stageDiv" style="position: relative; left: 40px; top: -50px;">
 		阶段&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<span id="stageSpan">
 		<span class="glyphicon glyphicon-ok-circle mystage" data-toggle="popover" data-placement="bottom" data-content="资质审查" style="color: #90F790;"></span>
 		-----------
 		<span class="glyphicon glyphicon-ok-circle mystage" data-toggle="popover" data-placement="bottom" data-content="需求分析" style="color: #90F790;"></span>
@@ -128,6 +321,7 @@
 		-----------
 		<span class="glyphicon glyphicon-record mystage" data-toggle="popover" data-placement="bottom" data-content="因竞争丢失关闭"></span>
 		-----------
+		</span>
 		<span class="closingDate">2010-10-10</span>
 	</div>
 	
@@ -135,63 +329,63 @@
 	<div style="position: relative; top: 0px;">
 		<div style="position: relative; left: 40px; height: 30px;">
 			<div style="width: 300px; color: gray;">所有者</div>
-			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b>zhangsan</b></div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b id="query-owner">zhangsan</b></div>
 			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">金额</div>
-			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b>5,000</b></div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b id="query-money">5,000</b></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 10px;">
 			<div style="width: 300px; color: gray;">名称</div>
-			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b>动力节点-交易01</b></div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b id="query-name">动力节点-交易01</b></div>
 			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">预计成交日期</div>
-			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b>2017-02-07</b></div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b id="query-expectedDate">2017-02-07</b></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 20px;">
 			<div style="width: 300px; color: gray;">客户名称</div>
-			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b>动力节点</b></div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b id="query-customerId">动力节点</b></div>
 			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">阶段</div>
-			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b>谈判/复审</b></div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b id="query-stage">谈判/复审</b></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 30px;">
 			<div style="width: 300px; color: gray;">类型</div>
-			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b>新业务</b></div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b id="query-type">新业务</b></div>
 			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">可能性</div>
-			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b>90</b></div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b id="query-stage2">90</b></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 40px;">
 			<div style="width: 300px; color: gray;">来源</div>
-			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b>广告</b></div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b id="query-source">广告</b></div>
 			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">市场活动源</div>
-			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b>发传单</b></div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b id="query-activityId">发传单</b></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 50px;">
 			<div style="width: 300px; color: gray;">联系人名称</div>
-			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b>李四</b></div>
+			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b id="query-contactsId">李四</b></div>
 			<div style="height: 1px; width: 550px; background: #D5D5D5; position: relative; top: -20px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 60px;">
 			<div style="width: 300px; color: gray;">创建者</div>
-			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b>zhangsan&nbsp;&nbsp;</b><small style="font-size: 10px; color: gray;">2017-01-18 10:10:10</small></div>
+			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b id="query-createBy">zhangsan&nbsp;&nbsp;</b><small style="font-size: 10px; color: gray;" id="query-createTime">2017-01-18 10:10:10</small></div>
 			<div style="height: 1px; width: 550px; background: #D5D5D5; position: relative; top: -20px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 70px;">
 			<div style="width: 300px; color: gray;">修改者</div>
-			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b>zhangsan&nbsp;&nbsp;</b><small style="font-size: 10px; color: gray;">2017-01-19 10:10:10</small></div>
+			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b id="query-editBy">zhangsan&nbsp;&nbsp;</b><small style="font-size: 10px; color: gray;" id="query-editTime">2017-01-19 10:10:10</small></div>
 			<div style="height: 1px; width: 550px; background: #D5D5D5; position: relative; top: -20px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 80px;">
 			<div style="width: 300px; color: gray;">描述</div>
 			<div style="width: 630px;position: relative; left: 200px; top: -20px;">
-				<b>
+				<b id="query-description">
 					这是一条线索的描述信息 （线索转换之后会将线索的描述转换到交易的描述中）
 				</b>
 			</div>
@@ -200,7 +394,7 @@
 		<div style="position: relative; left: 40px; height: 30px; top: 90px;">
 			<div style="width: 300px; color: gray;">联系纪要</div>
 			<div style="width: 630px;position: relative; left: 200px; top: -20px;">
-				<b>
+				<b id="query-contactSummary">
 					&nbsp;
 				</b>
 			</div>
@@ -208,7 +402,7 @@
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 100px;">
 			<div style="width: 300px; color: gray;">下次联系时间</div>
-			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b>&nbsp;</b></div>
+			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b id="query-nextContactTime">&nbsp;</b></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -20px;"></div>
 		</div>
 	</div>
@@ -276,7 +470,7 @@
 							<td>创建人</td>
 						</tr>
 					</thead>
-					<tbody>
+					<tbody id="historyTbody">
 						<tr>
 							<td>资质审查</td>
 							<td>5,000</td>

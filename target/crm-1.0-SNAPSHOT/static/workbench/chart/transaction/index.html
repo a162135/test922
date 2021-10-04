@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+
+    <link href="../../../jquery/bootstrap_3.3.0/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="../../../jquery/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet" />
+
+    <script type="text/javascript" src="../../../jquery/jquery-3.4.1.js"></script>
+    <script type="text/javascript" src="../../../jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
+    <script type="text/javascript" src="../../../jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js"></script>
+    <script type="text/javascript" src="../../../js/crmUtil.js"></script>
+    <script type="text/javascript" src="../../../js/ECharts/echarts.min.js"></script>
+    <script type="text/javascript">
+        $(function (){
+            clearPage();
+        })
+
+        function clearPage(){
+            var dataC = [];
+            var dataC2 = [];
+            $.ajax({
+                url:"/crm/tran/queryStageCount.do",
+                dataType:"json",
+                success:function (data){
+                    for (var i = 0; i < data.length; i++) {
+                        dataC.push(data[i].name);
+                        var tempJson = {};
+                        tempJson.name = data[i].name;
+                        tempJson.value = data[i].count;
+                        dataC2.push(tempJson);
+                    }
+                },
+                async:false
+            })
+            var chart = echarts.init(document.getElementById("myDiv"));
+            var option = {
+                title: {
+                    text: '交易阶段图',
+                    subtext: '阶段排名'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c}%"
+                },
+                toolbox: {
+                    feature: {
+                        dataView: {readOnly: false},
+                        restore: {},
+                        saveAsImage: {}
+                    }
+                },
+                legend: {
+                    data: dataC
+                },
+                calculable: true,
+                series: [
+                    {
+                        name:'漏斗图',
+                        type:'funnel',
+                        left: '10%',
+                        top: 60,
+                        //x2: 80,
+                        bottom: 60,
+                        width: '80%',
+                        // height: {totalHeight} - y - y2,
+                        min: 0,
+                        max: 100,
+                        minSize: '0%',
+                        maxSize: '100%',
+                        sort: 'descending',
+                        gap: 2,
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'inside'
+                            },
+                            emphasis: {
+                                textStyle: {
+                                    fontSize: 20
+                                }
+                            }
+                        },
+                        labelLine: {
+                            normal: {
+                                length: 10,
+                                lineStyle: {
+                                    width: 1,
+                                    type: 'solid'
+                                }
+                            }
+                        },
+                        itemStyle: {
+                            normal: {
+                                borderColor: '#fff',
+                                borderWidth: 1
+                            }
+                        },
+                        data: dataC2
+                    }
+                ]
+            };
+            chart.setOption(option);
+        }
+    </script>
+</head>
+<body>
+    <div style="height: 400px;width: 600px" id="myDiv">
+
+    </div>
+</body>
+</html>

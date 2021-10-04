@@ -52,4 +52,38 @@
                 #{createBy},
                 #{tranId})
     </insert>
+    <select id="selectAllById" resultType="com.crm.settings.domain.Tran">
+        select t.id,u.name as owner,t.money,
+               t.name,t.expectedDate,c.name as customerId,
+                d.value as stage,d2.value as type,
+                d3.value as source,a.name as activityId,
+               ct.fullname as contactsId,t.createBy,
+               t.createTime,t.editBy,t.editTime,t.description,
+               t.contactSummary,t.nextContactTime
+               from tbl_tran t
+        left join tbl_user u on t.owner = u.id
+        left join tbl_customer c on t.customerId = c.id
+        left join tbl_dic_value d on t.stage = d.id
+        left join tbl_dic_value d2 on t.type = d2.id
+        left join tbl_dic_value d3 on t.source = d3.id
+        left join tbl_activity a on t.activityId = a.id
+        left join tbl_contacts ct on t.contactsId = ct.id
+        where t.id = #{id}
+
+    </select>
+    <select id="selectHistoryByTranId" resultType="com.crm.settings.domain.TranHistory">
+        select t.id,d.value as stage,t.money,t.expectedDate,t.createTime,t.createBy,t.tranId
+        from tbl_tran_history t left join tbl_dic_value d on t.stage = d.id
+        where tranId = #{tranId}
+    </select>
+
+    <update id="updateStageById">
+        update tbl_tran set stage = (select id from tbl_dic_value where value = #{stage}),
+                            editBy = #{editBy},editTime = #{editTime}
+        where id = #{id}
+    </update>
+
+    <select id="selectStageGroup" resultType="map">
+        select d.value as name,count(*) as count from tbl_tran t join tbl_dic_value d on t.stage = d.id group by stage
+    </select>
 </mapper>

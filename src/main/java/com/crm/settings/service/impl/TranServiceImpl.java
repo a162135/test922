@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TranServiceImpl implements TranService {
@@ -24,6 +25,8 @@ public class TranServiceImpl implements TranService {
     private ActivityDao activityDao;
     @Resource
     private TranDao tranDao;
+    @Resource
+    private DicDao dicDao;
 
 
     @Override
@@ -64,6 +67,56 @@ public class TranServiceImpl implements TranService {
         if (tranDao.insert(tran) <= 0){
             yes = 0;
         }
+        TranHistory history = new TranHistory();
+        history.setId(UUIDUtil.getUUID());
+        history.setStage(tran.getStage());
+        history.setCreateBy(tran.getCreateBy());
+        history.setCreateTime(DateTimeUtil.getSysTime());
+        history.setMoney(tran.getMoney());
+        history.setExpectedDate(tran.getExpectedDate());
+        history.setTranId(tran.getId());
+        if (tranDao.insertHistory(history) <= 0){
+            yes = 0;
+        }
         return yes;
+    }
+
+    @Override
+    public Tran queryAllById(Tran tran) {
+        return tranDao.selectAllById(tran);
+    }
+
+    @Override
+    public List<TranHistory> queryHistory(TranHistory history) {
+        return tranDao.selectHistoryByTranId(history);
+    }
+
+    @Override
+    public List<DicValue> queryStage(){
+        return dicDao.selectStage();
+    }
+
+    @Transactional
+    @Override
+    public int setStage(Tran tran,TranHistory history) {
+        int i = 1;
+        if (tranDao.updateStageById(tran) <= 0){
+            i = 0;
+        }
+        history.setId(UUIDUtil.getUUID());
+        history.setCreateTime(DateTimeUtil.getSysTime());
+        history.setCreateBy(tran.getEditBy());
+        history.setTranId(tran.getId());
+        String stageId = dicDao.selectIdByValue(history.getStage());
+        history.setStage(stageId);
+        if (tranDao.insertHistory(history) <= 0){
+            i = 0;
+        }
+        return i;
+    }
+
+    @Override
+    public List<Map<String, Object>> queryStageCount() {
+        return tranDao.selectStageGroup();
     }
 }

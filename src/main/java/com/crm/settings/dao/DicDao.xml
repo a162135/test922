@@ -12,4 +12,12 @@
         select * from tbl_dic_value where typeCode = #{typeCode} order by orderNo
     </select>
 
+    <select id="selectStage" resultType="com.crm.settings.domain.DicValue">
+        select * from tbl_dic_value where typeCode = 'stage' order by orderNo
+    </select>
+
+    <select id="selectIdByValue" resultType="string">
+        select id from tbl_dic_value where value = #{value}
+    </select>
+
 </mapper>
